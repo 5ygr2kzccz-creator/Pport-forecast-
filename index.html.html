@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>التنبؤ اليومي بحجم الحاويات</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--tx:#14263a;--mu:#6b7a8a;--bd:#dde3e9;--hd:#12395c;--act:#12a594;--fc:#e0952b;--cap:#e0584f;--c5:#d6457a;--c6:#7a8b00;--c1:#1f6fb2;--c2:#2a9d6f;--c3:#d98324;--c4:#8a5cc2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1720;--card:#18232f;--tx:#e8eef4;--mu:#93a3b3;--bd:#2a3846;--hd:#0b2640;--act:#5ad4b8;--fc:#f7b93e;--cap:#ff7b72;--c5:#ff7aa8;--c6:#c6d84a;--c1:#5aa9ea;--c2:#4cc896;--c3:#f0a54b;--c4:#b891ec}}
+:root[data-theme="dark"]{--bg:#0f1720;--card:#18232f;--tx:#e8eef4;--mu:#93a3b3;--bd:#2a3846;--hd:#0b2640;--act:#5ad4b8;--fc:#f7b93e;--cap:#ff7b72;--c5:#ff7aa8;--c6:#c6d84a;--c1:#5aa9ea;--c2:#4cc896;--c3:#f0a54b;--c4:#b891ec}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Segoe UI",Tahoma,Arial,sans-serif;max-width:100%}
+header{background:var(--hd);color:#fff;padding:16px 16px 14px}
+h1{margin:0 0 4px;font-size:18px}
+header p{margin:0;font-size:12px;opacity:.8}
+main{padding:12px;max-width:980px;margin:auto}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:12px}
+label{font-size:12px;color:var(--mu);display:block;margin-bottom:6px}
+select,input[type=date]{width:100%;padding:10px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit;font-size:15px}
+.days{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}.dbtn{flex:0 0 auto;min-width:64px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:10px;padding:7px 8px;font:inherit;font-size:12px;cursor:pointer;text-align:center;line-height:1.5}.dbtn b{display:block;font-size:15px}.dbtn.on{background:var(--hd);color:#fff;border-color:var(--hd)}.tag{font-size:11px;padding:2px 8px;border-radius:10px;background:var(--bg);border:1px solid var(--bd);color:var(--mu)}.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:20;align-items:flex-end;justify-content:center}.ov.show{display:flex}.sheet{background:var(--card);color:var(--tx);width:100%;max-width:520px;border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}.sh-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:12px}.sh-h b{font-size:16px}.sh-h small{display:block;color:var(--mu);font-size:12px;margin-top:2px}.x{border:0;background:var(--bg);color:var(--tx);width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer}.row{margin:12px 0}.row .t{display:flex;justify-content:space-between;font-size:14px;margin-bottom:5px}.bar{height:8px;border-radius:4px;background:var(--bg);overflow:hidden}.bar i{display:block;height:100%;border-radius:4px}.tot{display:flex;justify-content:space-between;border-top:1px solid var(--bd);padding-top:10px;margin-top:14px;font-weight:700}.op{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--bd);font-size:13px;line-height:1.8}.op span{color:var(--mu)}.op b{font-size:14px}.kpis.two{grid-template-columns:repeat(2,1fr)}.big{font-size:19px!important}.sec{margin:4px 2px 8px}.chartwrap{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:12px}.chartwrap .cw{order:1}.chartwrap .side{order:2}@media(min-width:760px){.chartwrap{grid-template-columns:240px 1fr}.chartwrap .cw,.chartwrap .side{order:0}}.side .lg{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:13px}.side .lg i{flex:0 0 34px;height:0;border-top:3px solid}.side .lg small{display:block;color:var(--mu);font-size:11px}.side .dot{flex:0 0 34px;text-align:center;font-size:18px}.nv{background:linear-gradient(160deg,#35539a,#2a4278);color:#fff;border:1px solid #5d7fc4;border-radius:14px;padding:12px 14px}.nv small{display:block;color:#c9d6f2;font-size:12px;margin-top:3px}.nv .tt{font-size:13px;color:#dbe4f7}.nv .vv{font-size:22px;font-weight:700;margin:8px 0 2px}.nv .note{color:#c9d6f2}.nv .chip{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.25)}.nv .chip.on{background:#f7b93e;color:#1b2b4a;border-color:#f7b93e}.cap3{display:flex;justify-content:space-around;font-size:14px;font-weight:700;margin-top:8px}.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{border:1px solid var(--bd);background:var(--bg);color:var(--tx);padding:7px 12px;border-radius:20px;font:inherit;font-size:13px;cursor:pointer}
+.chip.on{background:var(--hd);color:#fff;border-color:var(--hd)}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+@media(min-width:700px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;border-top:4px solid;cursor:pointer}
+.kpi.on{outline:2px solid var(--tx)}
+.kpi b{display:block;font-size:20px;margin:4px 0 2px}
+.kpi span{font-size:12px;color:var(--mu)}
+.up{color:#2a9d6f}.dn{color:#d1453b}
+.box{position:relative;height:320px}
+.note{font-size:11px;color:var(--mu);margin:8px 0 0;line-height:1.7}
+</style>
+</head>
+<body>
+<header>
+<h1>التنبؤ اليومي بحجم الحاويات (TEU)</h1>
+<p id="sub">بيانات افتراضية</p>
+</header>
+<main>
+<div class="card">
+<label for="day">التاريخ</label>
+<select id="day"></select>
+<label for="port" style="margin-top:12px">الميناء</label>
+<select id="port"></select>
+<label for="opr" style="margin-top:12px">المشغل</label>
+<select id="opr"></select>
+</div>
+<div class="kpis" id="kpis"></div>
+<div class="card">
+<label>حجم المؤشرات في اليوم المحدد</label>
+<div class="box"><canvas id="ch2"></canvas></div>
+<p class="note">الخط الأفقي فوق كل عمود = المتوسط اليومي. اضغط على أي عمود لعرض أنواع الحاويات.</p>
+</div>
+<div class="chartwrap">
+<div class="card side" id="side" style="margin:0"></div>
+<div class="card cw" style="margin:0"><div class="box"><canvas id="ch"></canvas></div>
+<p class="note">إجمالي الحجم اليومي (TEU). الخط المتصل = فعلي، والمتقطع = توقع، والنقطة الكبيرة = الذروة المتوقعة. اضغط على أي يوم لاختياره.</p></div>
+</div>
+</main>
+<div class="ov" id="ov"><div class="sheet" id="sh"></div></div>
+<script>
+// ===== البيانات: استبدل genRaw بقراءة بياناتك الحقيقية (نفس الشكل) =====
+const PORTS=[
+{id:'all',n:'كل الموانئ'},
+{id:'jed',n:'ميناء جدة الإسلامي',s:4650},
+{id:'dam',n:'ميناء الملك عبدالعزيز بالدمام',s:2900},
+{id:'kap',n:'ميناء الملك عبدالله',s:1500},
+{id:'jub',n:'ميناء الجبيل التجاري',s:620},
+{id:'yan',n:'ميناء ينبع التجاري',s:480},
+{id:'jaz',n:'ميناء جازان',s:260}];
+const CATS=[
+{id:'imp',n:'وارد',sh:.40,v:'--c1'},
+{id:'exp',n:'صادر',sh:.28,v:'--c2'},
+{id:'trs',n:'مسافنة',sh:.22,v:'--c3'},
+{id:'rel',n:'إعادة تحميل',sh:.10,v:'--c4'},
+{id:'tex',n:'صادر ترانزيت',sh:.08,v:'--c5'},
+{id:'tim',n:'وارد ترانزيت',sh:.06,v:'--c6'}];
+const DOW=[1,1.05,1.05,1.05,1,.7,.9]; // أحد..سبت (الجمعة أقل)
+const ACT=60,END=new Date(2026,9,27);
+function rng(seed){return()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646}}
+function dateAt(k){const d=new Date(END);d.setDate(d.getDate()+k);return d}
+const lbl=d=>String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const raw={}; // raw[port][cat] = 60 قيمة فعلية
+PORTS.slice(1).forEach((p,pi)=>{raw[p.id]={};CATS.forEach((c,ci)=>{
+const r=rng(1000+pi*37+ci*11),a=[];
+for(let i=0;i<ACT;i++){const d=dateAt(i-ACT);
+a.push(Math.round(p.s*c.sh*DOW[d.getDay()]*(1+.0004*i)*(1+(r()-.5)*.08)))}
+raw[p.id][c.id]=a})});
+function series(pid,cid){
+if(pid==='all')return Array.from({length:ACT},(_,i)=>opPorts().reduce((s,p)=>s+raw[p.id][cid][i],0));
+return raw[pid][cid]}
+// ===== الواجهة =====
+const F=n=>Math.round(n).toLocaleString('en-US');
+function dayName(k){return k===-1?'أمس':k===0?'اليوم':k===1?'بكرة':dateAt(k).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{weekday:'long'})}
+function dayNum(k){return dateAt(k).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{day:'numeric',month:'short'})}
+let curPort='all',curK=0,chart;
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const OPR=[{id:'all',n:'كل المشغلين'},{id:'sgp',n:'الشركة السعودية للموانئ العالمية (SGP)',p:['dam','jub']},{id:'rsgt',n:'بوابة البحر الأحمر للمحطات (RSGT)',p:['jed','yan','jaz']},{id:'kap',n:'شركة ميناء الملك عبدالله',p:['kap']}];
+let curOp='all';
+function opPorts(){const o=OPR.find(x=>x.id===curOp);return PORTS.slice(1).filter(p=>curOp==='all'||o.p.includes(p.id))}
+function fillPorts(){const sel=$('port');sel.innerHTML='';sel.add(new Option(curOp==='all'?'كل الموانئ':'كل موانئ المشغل','all'));opPorts().forEach(p=>sel.add(new Option(p.n,p.id)));sel.value=curPort}
+OPR.forEach(o=>$('opr').add(new Option(o.n,o.id)));
+$('opr').onchange=e=>{curOp=e.target.value;curPort='all';fillPorts();draw()};
+$('port').onchange=e=>{curPort=e.target.value;draw()};
+fillPorts();
+function initDays(){
+const sel=$('day');
+for(let k=-1;k<=7;k++)sel.add(new Option(dayName(k)+' · '+dayNum(k),k));
+sel.value=curK;sel.onchange=e=>{curK=+e.target.value;draw()}}
+function fcIdx(a,n,t){let g=1;if(n>=56){const l=a.slice(n-28,n).reduce((x,y)=>x+y,0),p=a.slice(n-56,n-28).reduce((x,y)=>x+y,0);g=1+((l/p)-1)*.5}
+let sm=0,m=0;for(let w=1;w<=8;w++){const i=t-7*w;if(i>=0&&i<n){sm+=a[i];m++}}return Math.round(sm/m*g)}
+function dayVal(a,k){return k<0?a[ACT+k]:fcIdx(a,ACT,ACT+k)}
+const OPS={
+all:[['الشركة السعودية للموانئ العالمية (SGP)','المنطقة الشرقية: الدمام والجبيل'],['بوابة البحر الأحمر للمحطات (RSGT)','المنطقة الغربية: جدة وينبع وجازان']],
+jed:[['بوابة البحر الأحمر للمحطات (RSGT)','المحطات متعددة الأغراض · الهيئة العامة للموانئ (موانئ) هي الجهة المالكة']],
+dam:[['الشركة السعودية للموانئ العالمية (SGP)','شراكة بين صندوق الاستثمارات العامة و PSA International']],
+jub:[['الشركة السعودية للموانئ العالمية (SGP)','امتياز محطة الحاويات']],
+yan:[['بوابة البحر الأحمر للمحطات (RSGT)','المحطات متعددة الأغراض']],
+jaz:[['بوابة البحر الأحمر للمحطات (RSGT)','المحطات متعددة الأغراض']],
+kap:[['شركة ميناء الملك عبدالله','ميناء خاص بإدارة مستقلة']]};
+function showOp(){const o=OPS[curPort]||[];const _x=o.map(x=>`<div><span>${curPort==='all'?'المشغل · ':'المشغل: '}</span><b>${x[0]}</b><br><span>${x[1]}</span></div>`).join('')}
+const TYPES=[{n:'حاويات جافة',v:'--c1'},{n:'حاويات مبردة',v:'--c2'},{n:'حاويات خطرة',v:'--c3'}];
+const SH={imp:[.74,.18],exp:[.70,.24],trs:[.86,.10],rel:[.80,.14],tex:[.80,.12],tim:[.82,.12]};
+let last=[];
+function split(ci,v){const r=rng(7000+PORTS.findIndex(p=>p.id===curPort)*101+ci*13+(curK+5)*3);
+const [d,f]=SH[CATS[ci].id],dd=Math.round(v*(d+(r()-.5)*.03)),rf=Math.round(v*(f+(r()-.5)*.02));
+return[dd,rf,v-dd-rf]}
+function openSheet(ci){
+const v=last[ci],p=split(ci,v),c=CATS[ci],pn=curPort==='all'&&curOp!=='all'?OPR.find(x=>x.id===curOp).n:PORTS.find(x=>x.id===curPort).n;
+$('sh').innerHTML=`<div class="sh-h"><div><b>${c.n} · ${curK<0?'فعلي':'توقع'}</b><small>${dayName(curK)} ${dayNum(curK)} · ${pn}</small></div><button class="x" id="cl">✕</button></div>`
++TYPES.map((t,i)=>`<div class="row"><div class="t"><span>${t.n}</span><b>${F(p[i])} TEU</b></div><div class="bar"><i style="width:${(p[i]/v*100).toFixed(1)}%;background:${css(t.v)}"></i></div><small style="color:var(--mu)">${(p[i]/v*100).toFixed(1)}%</small></div>`).join('')
++`<div class="tot"><span>الإجمالي</span><span>${F(v)} TEU</span></div>`;
+$('ov').classList.add('show');$('cl').onclick=closeSheet}
+function closeSheet(){$('ov').classList.remove('show')}
+$('ov').onclick=e=>{if(e.target.id==='ov')closeSheet()};
+const TR=[{n:'صادر ترانزيت',sh:.08,v:'--c5'},{n:'وارد ترانزيت',sh:.06,v:'--c6'}];
+const trRaw={};PORTS.slice(1).forEach((p,pi)=>{trRaw[p.id]=TR.map((t,ti)=>{const r=rng(5000+pi*37+ti*11),a=[];
+for(let i=0;i<ACT;i++){const d=dateAt(i-ACT);a.push(Math.round(p.s*t.sh*DOW[d.getDay()]*(1+.0004*i)*(1+(r()-.5)*.08)))}return a})});
+function trSeries(ti){const ps=curPort==='all'?opPorts():[PORTS.find(p=>p.id===curPort)];
+return Array.from({length:ACT},(_,i)=>ps.reduce((s,p)=>s+trRaw[p.id][ti][i],0))}
+let chart2;
+function draw(){
+const isF=curK>=0;
+$('sub').textContent=dayName(curK)+' '+dayNum(curK)+' · '+(isF?'توقع':'فعلي')+' · بيانات افتراضية';
+const A=CATS.map(c=>series(curPort,c.id));
+const vals=[],avgs=[],kp=[];
+CATS.forEach((c,ci)=>{const a=A[ci],v=dayVal(a,curK),av=a.slice(-28).reduce((x,y)=>x+y,0)/28;
+vals.push(v);avgs.push(Math.round(av));kp.push({c,v,avg:av,col:css(c.v),d:(v/av-1)*100})});
+last=vals;
+const tv=vals.reduce((s,x)=>s+x,0),ta=kp.reduce((s,k)=>s+k.avg,0);
+$('kpis').innerHTML=kp.map((k,i)=>`<div class="kpi" data-i="${i}" style="border-top-color:${k.col}"><span>${k.c.n} · اضغط للتفاصيل</span><b>${F(k.v)}</b><span>المتوسط اليومي: ${F(k.avg)}</span><br><span class="${k.d>=0?'up':'dn'}">${k.d>=0?'▲':'▼'} ${Math.abs(k.d).toFixed(1)}% عن المتوسط</span></div>`).join('')
++`<div class="kpi" style="border-top-color:var(--tx);grid-column:1/-1"><span>الإجمالي · <span class="tag">${isF?'توقع':'فعلي'}</span></span><b>${F(tv)} TEU</b><span>المتوسط اليومي: ${F(ta)}</span></div>`;
+document.querySelectorAll('.kpi[data-i]').forEach(e=>e.onclick=()=>openSheet(+e.dataset.i));
+const tot=Array.from({length:ACT},(_,i)=>A.reduce((s,a)=>s+a[i],0));
+const BK=14,FH=7,N=BK+FH+1,labels=[];
+for(let k=-BK;k<=FH;k++)labels.push(lbl(dateAt(k)));
+const act=Array(N).fill(null),fcs=Array(N).fill(null),avl=Array(N).fill(null);
+for(let k=-BK;k<0;k++)act[k+BK]=tot[ACT+k];
+fcs[BK-1]=tot[ACT-1];
+const fv=[];for(let k=0;k<=FH;k++){const v=A.reduce((s,a)=>s+dayVal(a,k),0);fv.push(v);fcs[BK+k]=v}
+const avg=Math.round(fv.reduce((s,x)=>s+x,0)/fv.length);
+for(let k=0;k<=FH;k++)avl[BK+k]=avg;
+let pk=0;fv.forEach((v,k)=>{if(v>fv[pk])pk=k});
+const ps=curPort==='all'?opPorts():[PORTS.find(p=>p.id===curPort)];
+const cap=Math.round(ps.reduce((s,p)=>s+p.s,0)*1.22);
+const tx=css('--mu'),gr=css('--bd'),fg=css('--tx'),cA=css('--act'),cF=css('--fc'),cC=css('--cap');
+const over=fv[pk]>cap;
+$('side').innerHTML=`<div class="lg"><i style="border-color:${cA}"></i><div>فعلي</div></div>
+<div class="lg"><i style="border-color:${cF};border-top-style:dashed"></i><div>توقع</div></div>
+<div class="lg"><i style="border-color:${fg};border-top-style:dotted"></i><div>متوسط يومي<small>${F(avg)} TEU</small></div></div>
+<div class="lg"><i style="border-color:${cC};border-top-style:dashed"></i><div>حد السعة<small>${F(cap)} TEU</small></div></div>
+<div class="lg"><span class="dot" style="color:${cF}">●</span><div>الذروة المتوقعة<small>${dayName(pk)} ${dayNum(pk)} · ${F(fv[pk])} TEU</small><small class="${over?'dn':''}">${over?'⚠ يتجاوز حد السعة':(fv[pk]/cap*100).toFixed(0)+'% من حد السعة'}</small></div></div>`;
+const one=(i,v)=>{const d=Array(N).fill(null);d[i]=v;return d};
+const sel=curK>=-1?one(BK+curK,isF?fv[curK]:tot[ACT+curK]):Array(N).fill(null);
+if(chart)chart.destroy();if(chart2)chart2.destroy();
+Chart.defaults.font.family='"Segoe UI",Tahoma,Arial,sans-serif';
+const nowP={id:'now',afterDatasetsDraw(c){const x=c.scales.x,y=c.scales.y,g=c.ctx,px=(x.getPixelForValue(BK-1)+x.getPixelForValue(BK))/2;
+g.save();g.setLineDash([2,3]);g.strokeStyle=tx;g.beginPath();g.moveTo(px,y.top);g.lineTo(px,y.bottom);g.stroke();g.setLineDash([]);
+g.fillStyle=fg;g.font='12px sans-serif';g.textAlign='center';g.fillText('الآن',px,y.top+12);
+g.fillStyle=cC;g.textAlign='left';g.fillText('حد السعة',x.left+4,y.getPixelForValue(cap)-5);g.restore()}};
+chart=new Chart($('ch'),{type:'line',plugins:[nowP],data:{labels,datasets:[
+{label:'فعلي',data:act,borderColor:cA,borderWidth:2.5,pointRadius:0,tension:.2},
+{label:'توقع',data:fcs,borderColor:cF,borderWidth:2.5,borderDash:[6,4],pointRadius:0,tension:.2},
+{label:'المتوسط اليومي',data:avl,borderColor:tx,borderWidth:1.5,borderDash:[2,4],pointRadius:0},
+{label:'حد السعة',data:Array(N).fill(cap),borderColor:cC,borderWidth:1.5,borderDash:[7,5],pointRadius:0},
+{label:'_الذروة',data:one(BK+pk,fv[pk]),showLine:false,pointRadius:8,pointBackgroundColor:cF,pointBorderColor:'#fff',pointBorderWidth:2},
+{label:'_المحدد',data:sel,showLine:false,pointRadius:6,pointBackgroundColor:'transparent',pointBorderColor:fg,pointBorderWidth:2.5}]},
+options:{onClick:(e,_,ch)=>{const h=ch.getElementsAtEventForMode(e,'index',{intersect:false},true);if(!h.length)return;const k=h[0].index-BK;if(k>=-1&&k<=7){curK=k;$('day').value=k;draw()}},
+responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},
+plugins:{legend:{display:false},tooltip:{rtl:true,textDirection:'rtl',filter:i=>i.raw!==null&&!i.dataset.label.startsWith('_')&&i.dataset.label!=='حد السعة'}},
+scales:{x:{ticks:{color:tx,maxTicksLimit:8,maxRotation:0},grid:{display:false}},y:{suggestedMax:Math.max(cap,...fv)*1.05,ticks:{color:tx},grid:{color:gr},title:{display:true,text:'TEU / يوم',color:tx}}}}});
+chart2=new Chart($('ch2'),{data:{labels:CATS.map(c=>c.n),datasets:[
+{type:'bar',label:isF?'توقع':'فعلي',data:vals,backgroundColor:kp.map(k=>k.col),borderRadius:6,maxBarThickness:46,order:2},
+{type:'line',label:'المتوسط اليومي',data:avgs,showLine:false,pointStyle:'line',pointRadius:20,pointHoverRadius:20,borderWidth:3,borderColor:fg,backgroundColor:fg,order:1}]},
+options:{onClick:(e,_,ch)=>{const h=ch.getElementsAtEventForMode(e,'index',{intersect:false},true);if(h.length)openSheet(h[0].index)},
+responsive:true,maintainAspectRatio:false,animation:false,
+plugins:{legend:{display:false},tooltip:{rtl:true,textDirection:'rtl'}},
+scales:{x:{ticks:{color:tx,font:{size:11}},grid:{display:false}},y:{beginAtZero:true,ticks:{color:tx},grid:{color:gr},title:{display:true,text:'TEU / يوم',color:tx}}}}})}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+initDays();draw();
+</script>
+</body>
+</html>
